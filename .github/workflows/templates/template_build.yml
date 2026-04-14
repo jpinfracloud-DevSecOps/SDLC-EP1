@@ -1,0 +1,59 @@
+# ==========================================
+# Plantilla Reutilizable: Etapa de Build
+# Propósito: Estandarizar la construcción de artefactos para TechMarket
+# ==========================================
+
+name: Template - Build
+
+on:
+  workflow_call:
+    # Parametrización: Definición de entradas para que sea reutilizable [cite: 42, 45]
+    inputs:
+      node_version:
+        description: 'Versión de Node.js a utilizar'
+        default: '18'
+        required: false
+        type: string
+      environment:
+        description: 'Entorno de ejecución (dev, staging, prod)'
+        required: true
+        type: string
+    
+    # Definición de salidas para retornar valores a otros jobs 
+    outputs:
+      build_status:
+        description: "Estado final de la construcción"
+        value: ${{ jobs.build.outputs.status }}
+
+jobs:
+  build:
+    name: Build Application (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ job.status }}
+
+    steps:
+      # 1. Integración de acción externa: Checkout [cite: 33]
+      - name: Checkout Code
+        [cite_start]uses: actions/checkout@v4 # Uso de versionamiento semántico [cite: 29]
+
+      # 2. Integración de acción externa: Setup Node [cite: 33]
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      # 3. Pasos lógicos y ordenados [cite: 28]
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build --if-present
+
+      # 4. Simulación de empaquetado/artefacto [cite: 28]
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build-${{ inputs.environment }}
+          path: dist/
+          retention-days: 1

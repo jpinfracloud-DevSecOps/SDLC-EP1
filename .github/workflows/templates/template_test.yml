@@ -1,0 +1,54 @@
+# ==========================================
+# Plantilla Reutilizable: Etapa de Test
+# Propósito: Estandarizar pruebas y validaciones de seguridad
+# ==========================================
+
+name: Template - Test
+
+on:
+  workflow_call:
+    inputs:
+      run_security_scan:
+        description: 'Determina si se ejecuta el escaneo de seguridad'
+        default: true
+        required: false
+        type: boolean
+    outputs:
+      test_result:
+        description: "Resultado de las pruebas"
+        value: ${{ jobs.test.outputs.outcome }}
+
+jobs:
+  test:
+    name: Execute Quality Tests
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ job.status }}
+
+    steps:
+      # 1. Checkout del código (Acción externa esencial)
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Configuración del entorno (Reutilizando lógica de Node)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # 3. Ejecución de pruebas unitarias
+      - name: Run Unit Tests
+        run: npm test --if-present
+
+      # 4. Integración de componente externo: Escaneo de Seguridad (Marketplace)
+      # Se incluye una condicional (if) para demostrar parametrización avanzada
+      - name: Security Scan (Super-Linter)
+        if: ${{ inputs.run_security_scan }}
+        uses: github/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
