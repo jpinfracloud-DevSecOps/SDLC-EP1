@@ -1,49 +1,27 @@
-# ==========================================
-# Plantilla Reutilizable: Etapa de Deploy
-# Propósito: Estandarizar el despliegue en TechMarket
-# ==========================================
-
 name: Template - Deploy
 
 on:
   workflow_call:
     inputs:
       environment:
-        description: 'Entorno de destino (dev/staging/prod)'
         required: true
         type: string
       release_version:
-        description: 'Versión de la entrega'
         required: true
         type: string
-    # Uso de secretos para seguridad (Buena práctica SDLC)
     secrets:
       DEPLOY_TOKEN:
         required: true
 
 jobs:
   deploy:
-    name: Deploy to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    # Definición de variables de entorno parametrizables [cite: 44]
-    env:
-      APP_ENV: ${{ inputs.environment }}
-      VERSION: ${{ inputs.release_version }}
-
+    environment: ${{ inputs.environment }}
     steps:
-      # 1. Acción externa del Marketplace para configurar credenciales [cite: 33]
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.DEPLOY_TOKEN }}
-          aws-region: us-east-1
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      # 2. Lógica de despliegue simulada
-      - name: Execute Deployment
+      - name: Deploy to ${{ inputs.environment }}
         run: |
-          echo "Desplegando versión $VERSION en el entorno de $APP_ENV..."
-          echo "Finalizado con éxito."
-
-      # 3. Verificación de salud (Healthcheck)
-      - name: Post-Deployment Check
-        run: echo "Verificando disponibilidad del servicio..."
+          echo "Desplegando versión ${{ inputs.release_version }} en el entorno ${{ inputs.environment }}"
+          echo "Utilizando token de seguridad para autenticación..."
