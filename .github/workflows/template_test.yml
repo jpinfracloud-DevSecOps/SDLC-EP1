@@ -1,0 +1,29 @@
+name: Template - Test
+
+on:
+  workflow_call:
+    inputs:
+      run_security_scan:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Quality Tests
+        run: |
+          if [ -f package.json ]; then
+            npm install
+            npm test --if-present
+          else
+            echo "No se detectó package.json. Saltando pruebas unitarias para demostración de arquitectura."
+          fi
+
+      - name: Security Scan
+        if: ${{ inputs.run_security_scan }}
+        run: echo "Ejecutando escaneo de seguridad simulado..."

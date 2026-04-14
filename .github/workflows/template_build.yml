@@ -1,0 +1,35 @@
+name: Template - Build
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        required: false
+        type: string
+        default: '18'
+      environment:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Install and Build
+        run: |
+          # Usamos un echo para simular el proceso si no hay package.json
+          # Esto evita que el pipeline falle por falta de archivos de Node
+          if [ -f package.json ]; then
+            npm install
+            npm run build --if-present
+          else
+            echo "No se detectó package.json. Saltando instalación para fines de demostración de infraestructura."
+          fi

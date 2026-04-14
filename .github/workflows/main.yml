@@ -1,0 +1,35 @@
+name: Main Pipeline SDLC
+
+on:
+  push:
+    branches:
+      - main
+      - Dev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  call-build:
+    name: 'Build Application'
+    uses: ./.github/workflows/template_build.yml
+    with:
+      environment: 'development'
+      node_version: '18.x'
+
+  call-test:
+    name: 'Run Tests'
+    needs: call-build
+    uses: ./.github/workflows/template_test.yml
+    with:
+      run_security_scan: true
+
+  call-deploy:
+    name: 'Deploy to Dev'
+    needs: call-test
+    uses: ./.github/workflows/template_deploy.yml
+    with:
+      environment: 'dev'
+      release_version: 'v1.0.0'
+    secrets:
+      DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,27 @@
+name: Template - Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      release_version:
+        required: true
+        type: string
+    secrets:
+      DEPLOY_TOKEN:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to ${{ inputs.environment }}
+        run: |
+          echo "Desplegando versión ${{ inputs.release_version }} en el entorno ${{ inputs.environment }}"
+          echo "Utilizando token de seguridad para autenticación..."
