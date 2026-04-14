@@ -1,40 +1,32 @@
-# ==========================================
-# Workflow Orquestador: Pipeline SDLC TechMarket
-# Propósito: Demostrar la reutilización de plantillas parametrizadas
-# ==========================================
-
 name: Main Pipeline SDLC
 
 on:
   push:
     branches:
       - main
-      - Dev # Se activa con tu rama actual
+      - Dev
   pull_request:
     branches:
       - main
 
 jobs:
-  # 1. Llamada a la plantilla de Construcción
   call-build:
-    uses: ./.github/workflows/templates/template_build.yml
+    uses: ./.github/workflows/template_build.yml
     with:
       environment: 'development'
       node_version: '18.x'
 
-  # 2. Llamada a la plantilla de Pruebas (depende de build)
   call-test:
     needs: call-build
-    uses: ./.github/workflows/templates/template_test.yml
+    uses: ./.github/workflows/template_test.yml
     with:
       run_security_scan: true
 
-  # 3. Llamada a la plantilla de Despliegue (depende de test)
   call-deploy:
     needs: call-test
-    uses: ./.github/workflows/templates/template_deploy.yml
+    uses: ./.github/workflows/template_deploy.yml
     with:
       environment: 'dev'
-      release_version: 'v1.0.0' # Aplicando versionamiento semántico
+      release_version: 'v1.0.0'
     secrets:
       DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
